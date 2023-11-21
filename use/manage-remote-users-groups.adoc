@@ -1,0 +1,82 @@
+---
+sidebar: sidebar 
+permalink: use/manage-remote-users-groups.html 
+keywords: import, import users, search, search users, groups, import groups 
+summary: Gerencie usuários e grupos LDAP remotos no sistema Astra Control Center. 
+---
+= Gerenciar usuários e grupos remotos
+:hardbreaks:
+:allow-uri-read: 
+:icons: font
+:imagesdir: ../media/use/
+
+
+[role="lead"]
+Se você ativou a autenticação LDAP no sistema Astra Control, poderá pesquisar usuários e grupos LDAP e incluí-los nos usuários aprovados do sistema.
+
+
+
+== Adicionar um utilizador remoto
+
+Proprietários e administradores de contas podem adicionar usuários remotos ao Astra Control.
+
+
+NOTE: Não é possível adicionar um utilizador remoto se já existir um utilizador local com o mesmo endereço de correio eletrónico no sistema. Para adicionar o utilizador como utilizador remoto, primeiro elimine o utilizador local do sistema.
+
+
+IMPORTANT: O Astra Control Center usa o endereço de e-mail no atributo LDAP "mail" para pesquisar e acompanhar usuários remotos. Este atributo pode ser um campo opcional ou vazio no seu diretório. Um endereço de e-mail deve existir neste campo para todos os usuários remotos que você deseja aparecer no Astra Control Center. Este endereço de e-mail é usado como nome de usuário no Astra Control Center para autenticação.
+
+.Passos
+. Vá para a área *conta*.
+. Selecione a guia *usuários e grupos*.
+. No canto direito da página, selecione *usuários remotos*.
+. Selecione *Adicionar*.
+. Opcionalmente, procure um usuário LDAP inserindo o endereço de e-mail do usuário no campo *Filtrar por e-mail*.
+. Selecione um ou mais utilizadores na lista.
+. Atribua uma função ao utilizador.
++
+
+NOTE: Se você atribuir funções diferentes a um usuário e ao grupo do usuário, a função mais permissiva terá precedência.
+
+. Opcionalmente, atribua uma ou mais restrições de namespace a este usuário e selecione *restringir função a restrições* para aplicá-las. Você pode adicionar uma nova restrição de namespace selecionando *Add constraint*.
++
+
+NOTE: Quando um usuário recebe várias funções por meio da associação ao grupo LDAP, as restrições na função mais permissiva são as únicas que entram em vigor. Por exemplo, se um utilizador com uma função Visualizador local juntar três grupos que estão ligados à função Membro, a soma das restrições das funções Membro entra em vigor e quaisquer restrições da função Visualizador são ignoradas.
+
+. Selecione *Adicionar*.
+
+
+.Resultado
+O novo utilizador aparece na lista de utilizadores remotos. Nesta lista, você pode ver restrições ativas no usuário, bem como gerenciar o usuário no menu *ações*.
+
+
+
+== Adicionar um grupo remoto
+
+Para adicionar muitos usuários remotos de uma só vez, os proprietários e administradores de contas podem adicionar grupos remotos ao Astra Control. Quando você adiciona um grupo remoto, todos os usuários remotos nesse grupo são adicionados ao Astra Control e herdam a mesma função.
+
+.Passos
+. Vá para a área *conta*.
+. Selecione a guia *usuários e grupos*.
+. No canto direito da página, selecione *grupos remotos*.
+. Selecione *Adicionar*.
++
+Nesta janela, você pode ver uma lista dos nomes comuns e nomes distintos dos grupos LDAP que o Astra Control recuperou do diretório.
+
+. Opcionalmente, procure um grupo LDAP inserindo o nome comum do grupo no campo *Filtrar por nome comum*.
+. Selecione um ou mais grupos na lista.
+. Atribua uma função aos grupos.
++
+
+NOTE: A função selecionada é atribuída a todos os usuários deste grupo. Se você atribuir funções diferentes a um usuário e ao grupo do usuário, a função mais permissiva terá precedência.
+
+. Opcionalmente, atribua uma ou mais restrições de namespace a esse grupo e selecione *restringir função a restrições* para aplicá-las. Você pode adicionar uma nova restrição de namespace selecionando *Add constraint*.
++
+
+NOTE: Quando um usuário recebe várias funções por meio da associação ao grupo LDAP, as restrições na função mais permissiva são as únicas que entram em vigor. Por exemplo, se um utilizador com uma função Visualizador local juntar três grupos que estão ligados à função Membro, a soma das restrições das funções Membro entra em vigor e quaisquer restrições da função Visualizador são ignoradas.
+
+. Selecione *Adicionar*.
+
+
+.Resultado
+O novo grupo aparece na lista de grupos remotos e todos os usuários remotos deste grupo aparecem na lista de usuários remotos. Nesta lista, você pode ver detalhes sobre o grupo, bem como gerenciar o grupo no menu *ações*.

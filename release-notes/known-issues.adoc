@@ -1,0 +1,203 @@
+---
+sidebar: sidebar 
+permalink: release-notes/known-issues.html 
+keywords: astra, control center, bugs, known issues, problems 
+summary: Problemas conhecidos identificam problemas que podem impedi-lo de usar esta versão do produto com sucesso. 
+---
+= Problemas conhecidos
+:hardbreaks:
+:allow-uri-read: 
+:source-highlighter: highlight.js
+:icons: font
+:imagesdir: ../media/release-notes/
+
+
+[role="lead"]
+Problemas conhecidos identificam problemas que podem impedi-lo de usar esta versão do produto com sucesso.
+
+Os seguintes problemas conhecidos afetam a versão atual:
+
+.Aplicações
+* <<A restauração de um aplicativo resulta em tamanho PV maior do que o PV original>>
+* <<Os clones de aplicativos falham usando uma versão específica do PostgreSQL>>
+* <<Os clones do aplicativo falham ao usar as restrições de contexto de segurança do OCP (SCC) no nível da conta de serviço>>
+* <<Os clones do aplicativo falham após a implantação de uma aplicação com uma classe de storage definida>>
+* <<Backups e snapshots de aplicativos falharão se a volumesnapshotclass for adicionada após o gerenciamento de um cluster>>
+
+
+.Clusters
+* <<O gerenciamento de um cluster com Astra Control Center falha quando o arquivo kubeconfig padrão contém mais de um contexto>>
+* <<Alguns pods não conseguem iniciar após a atualização para o Astra Control Center 23,04>>
+* <<Alguns pods mostram um estado de erro após o estágio de limpeza da atualização de 23,04 para 23.04.2>>
+* <<Um pod de monitoramento pode falhar em ambientes do Istio>>
+
+
+.Outras questões
+* <<Os clusters gerenciados não aparecem no NetApp Cloud Insights ao se conetar por meio de um proxy>>
+* <<As operações de gerenciamento de dados da aplicação falham com erro de serviço interno (500) quando o Astra Trident está off-line>>
+
+
+
+
+== A restauração de um aplicativo resulta em tamanho PV maior do que o PV original
+
+Se você redimensionar um volume persistente após criar um backup e restaurar a partir desse backup, o tamanho do volume persistente corresponderá ao novo tamanho do PV em vez de usar o tamanho do backup.
+
+
+
+== Os clones de aplicativos falham usando uma versão específica do PostgreSQL
+
+Clones de aplicativos dentro do mesmo cluster falham consistentemente com o gráfico Bitnami PostgreSQL 11.5.0. Para clonar com sucesso, use uma versão anterior ou posterior do gráfico.
+
+
+
+== Os clones do aplicativo falham ao usar as restrições de contexto de segurança do OCP (SCC) no nível da conta de serviço
+
+Um clone de aplicativo pode falhar se as restrições de contexto de segurança originais forem configuradas no nível da conta de serviço dentro do namespace no cluster OpenShift Container Platform. Quando o clone de aplicação falha, ele aparece na área de aplicações gerenciadas no Astra Control Center com status `Removed`. Consulte https://kb.netapp.com/Cloud/Astra/Control/Application_clone_is_failing_for_an_application_in_Astra_Control_Center["artigo da base de conhecimento"^] para obter mais informações.
+
+
+
+== Backups e snapshots de aplicativos falharão se a volumesnapshotclass for adicionada após o gerenciamento de um cluster
+
+Backups e snapshots falham `UI 500 error` nesse cenário. Como solução alternativa, atualize a lista de aplicativos.
+
+
+
+== Os clones do aplicativo falham após a implantação de uma aplicação com uma classe de storage definida
+
+Depois que um aplicativo é implantado com uma classe de armazenamento explicitamente definida (por exemplo, `helm install ...-set global.storageClass=netapp-cvs-perf-extreme`), as tentativas subsequentes de clonar o aplicativo exigem que o cluster de destino tenha a classe de armazenamento especificada originalmente. Clonar um aplicativo com uma classe de storage definida explicitamente para um cluster que não tenha a mesma classe de storage falhará. Não há etapas de recuperação neste cenário.
+
+
+
+== O gerenciamento de um cluster com Astra Control Center falha quando o arquivo kubeconfig padrão contém mais de um contexto
+
+Você não pode usar um kubeconfig com mais de um cluster e contexto nele. Consulte link:https://kb.netapp.com/Cloud/Astra/Control/Managing_cluster_with_Astra_Control_Center_may_fail_when_using_default_kubeconfig_file_contains_more_than_one_context["artigo da base de conhecimento"^] para obter mais informações.
+
+
+
+== Alguns pods não conseguem iniciar após a atualização para o Astra Control Center 23,04
+
+Depois de atualizar para o Astra Control Center 23,04, alguns pods podem não ser iniciados. Como solução alternativa, reinicie manualmente os pods afetados usando as seguintes etapas:
+
+. Localize os pods afetados, substituindo o <namespace> pelo namespace atual:
++
+[listing]
+----
+kubectl get pods -n <namespace> | grep au-pod
+----
++
+Os pods afetados terão resultados semelhantes aos seguintes:
+
++
+[listing]
+----
+pcloud-astra-control-center-au-pod-0 0/1 CreateContainerConfigError 0 13s
+----
+. Reinicie cada pod afetado, substituindo o <namespace> pelo namespace atual:
++
+[listing]
+----
+kubectl delete pod pcloud-astra-control-center-au-pod-0 -n <namespace>
+----
+
+
+
+
+== Alguns pods mostram um estado de erro após o estágio de limpeza da atualização de 23,04 para 23.04.2
+
+Depois de atualizar para o Astra Control Center 23.04.2, alguns pods podem mostrar um erro nos logs relacionados `task-service-task-purge` ao :
+
+[listing]
+----
+kubectl get all -n netapp-acc -o wide|grep purge
+
+pod/task-service-task-purge-28282828-ab1cd     0/1     Error       0             48m     10.111.0.111   openshift-clstr-ol-07-zwlj8-worker-jhp2b   <none>           <none>
+----
+Este estado de erro significa que uma etapa de limpeza não foi executada corretamente. A atualização geral para o 23.04.2 é bem-sucedida. Execute o seguinte comando para limpar a tarefa e remover o estado de erro:
+
+[listing]
+----
+kubectl delete job task-service-task-purge-[system-generated task ID] -n <netapp-acc or custom namespace>
+----
+
+
+== Um pod de monitoramento pode falhar em ambientes do Istio
+
+Se você emparelhar o Astra Control Center com o Cloud Insights em um ambiente Istio, o `telegraf-rs` pod poderá falhar. Como solução alternativa, execute as seguintes etapas:
+
+. Encontre o pod avariado:
++
+[listing]
+----
+kubectl -n netapp-monitoring get pod | grep Error
+----
++
+Você deve ver saída semelhante ao seguinte:
+
++
+[listing]
+----
+NAME READY STATUS RESTARTS AGE
+telegraf-rs-fhhrh 1/2 Error 2 (26s ago) 32s
+----
+. Reinicie o pod avariado, substituindo `<pod_name_from_output>` pelo nome do pod afetado:
++
+[listing]
+----
+kubectl -n netapp-monitoring delete pod <pod_name_from_output>
+----
++
+Você deve ver saída semelhante ao seguinte:
+
++
+[listing]
+----
+pod "telegraf-rs-fhhrh" deleted
+----
+. Verifique se o pod foi reiniciado e não está em um estado de erro:
++
+[listing]
+----
+kubectl -n netapp-monitoring get pod
+----
++
+Você deve ver saída semelhante ao seguinte:
+
++
+[listing]
+----
+NAME READY STATUS RESTARTS AGE
+telegraf-rs-rrnsb 2/2 Running 0 11s
+----
+
+
+
+
+== Os clusters gerenciados não aparecem no NetApp Cloud Insights ao se conetar por meio de um proxy
+
+Quando o Astra Control Center se conecta ao NetApp Cloud Insights por meio de um proxy, os clusters gerenciados podem não aparecer no Cloud Insights. Como solução alternativa, execute os seguintes comandos em cada cluster gerenciado:
+
+[source, console]
+----
+kubectl get cm telegraf-conf -o yaml -n netapp-monitoring | sed '/\[\[outputs.http\]\]/c\    [[outputs.http]]\n    use_system_proxy = true' | kubectl replace -f -
+----
+[source, console]
+----
+kubectl get cm telegraf-conf-rs -o yaml -n netapp-monitoring | sed '/\[\[outputs.http\]\]/c\    [[outputs.http]]\n    use_system_proxy = true' | kubectl replace -f -
+----
+[source, console]
+----
+kubectl get pods -n netapp-monitoring --no-headers=true | grep 'telegraf-ds\|telegraf-rs' | awk '{print $1}' | xargs kubectl delete -n netapp-monitoring pod
+----
+
+
+== As operações de gerenciamento de dados da aplicação falham com erro de serviço interno (500) quando o Astra Trident está off-line
+
+Se o Astra Trident em um cluster de aplicações ficar offline (e for colocado novamente online) e se forem encontrados 500 erros de serviço interno ao tentar o gerenciamento de dados de aplicações, reinicie todos os nós do Kubernetes no cluster de aplicações para restaurar a funcionalidade.
+
+
+
+== Encontre mais informações
+
+* link:../release-notes/known-limitations.html["Limitações conhecidas"]
+
